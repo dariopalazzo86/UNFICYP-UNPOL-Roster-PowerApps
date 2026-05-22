@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UNPOL Roster — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f7fa;--bg2:#fff;--bg3:#eef1f6;--bg4:#e2e7f0;
+  --border:#dde2ec;--border2:#c8d0e0;
+  --text:#1a1f36;--text2:#4a5170;--text3:#8890aa;
+  --accent:#3b5bdb;--accent2:#2f4ac7;
+  --r:7px;--rl:11px;
+  --ui:'Inter',sans-serif;--mono:'DM Mono',monospace;
+  --sh:0 1px 4px rgba(0,0,0,.08);
+  --red:#dc2626;--green:#16a34a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui)}
+body{display:flex;flex-direction:column;min-height:100vh;user-select:none}
+header{display:flex;align-items:center;gap:12px;padding:11px 20px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:60;box-shadow:var(--sh);flex-wrap:wrap}
+.logo{font-size:16px;font-weight:700;color:var(--accent);letter-spacing:-.3px}
+.sub{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:1px}
+.hright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rbadge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700;letter-spacing:.5px;background:var(--accent);color:#fff}
+.sind{font-size:11px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px;transition:color .3s}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .3s;flex-shrink:0}
+.sind.saving{color:#d97706}.sind.saving .sdot{background:#d97706}
+.sind.saved{color:var(--green)}.sind.saved .sdot{background:var(--green)}
+.sind.error{color:var(--red)}.sind.error .sdot{background:var(--red)}
+nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto}
+.tab{font-size:12px;font-weight:600;letter-spacing:.3px;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text3);white-space:nowrap;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--text2)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+main{flex:1;padding:14px 20px;overflow:auto}
+.panel{display:none}.panel.active{display:block}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:11px;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--sh)}
+input[type=text],input[type=date],select{font-size:12px;font-family:var(--ui);padding:5px 8px;border-radius:var(--r);border:1px solid var(--border2);background:#fff;color:var(--text);outline:none;transition:border-color .15s}
+input[type=text]:focus,input[type=date]:focus,select:focus{border-color:var(--accent)}
+input::placeholder{color:var(--text3)}
+label{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.btn{font-size:12px;font-family:var(--ui);font-weight:600;padding:5px 11px;border-radius:var(--r);border:1px solid var(--border2);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.btn:hover{background:var(--bg3);color:var(--text)}
+.btn.acc{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.acc:hover{background:var(--accent2)}
+.btn.sm{font-size:11px;padding:3px 8px}
+.btn.dan{color:var(--red);border-color:var(--red)}.btn.dan:hover{background:#fef2f2}
+.stats{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;align-items:center}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;box-shadow:var(--sh);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.slbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.sval{font-size:13px;font-weight:700;font-family:var(--mono)}
+.legend{display:flex;gap:10px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap;align-items:center;font-family:var(--mono)}
+.lsq{width:13px;height:13px;border-radius:3px;display:inline-block;vertical-align:-3px;margin-right:3px;border:1px solid rgba(0,0,0,.1)}
+.twrap{display:block;overflow-x:auto;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rl);max-height:calc(100vh - 300px);background:var(--bg2);box-shadow:var(--sh);-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:100%}
+thead th{position:sticky;top:0;background:#f8f9fc;z-index:10;padding:6px 3px;border-bottom:1px solid var(--border2);font-weight:600;text-align:center;white-space:nowrap;color:var(--text2)}
+thead th.uc{left:0;z-index:22;text-align:left;padding-left:10px;min-width:140px;font-family:var(--ui);font-size:11px;background:#f8f9fc}
+thead th.ic{left:140px;z-index:21;min-width:78px;background:#f8f9fc}
+thead th.we{background:#f0f4f8!important;color:var(--text3)}
+tbody th.uc{position:sticky;left:0;z-index:6;background:var(--bg2);padding:4px 10px;border-right:1px solid var(--border);font-weight:500;white-space:nowrap;min-width:140px;font-family:var(--ui);font-size:11px}
+tbody td.ic{position:sticky;left:140px;z-index:5;background:var(--bg2);border-right:1px solid var(--border);padding:3px 4px;min-width:78px}
+tbody tr:hover th.uc,tbody tr:hover td.ic{background:#eff3ff}
+td{border:1px solid var(--border);text-align:center;cursor:pointer;min-width:46px;vertical-align:middle;padding:2px}
+.dhdr-num{display:block;font-size:11px;font-weight:700;color:var(--text);line-height:1.2}
+.dhdr-date{display:block;font-size:9px;color:var(--text3);font-family:var(--ui);white-space:nowrap;line-height:1.2}
+thead th.we .dhdr-num,thead th.we .dhdr-date{color:var(--text3)}
+.cell-shift{display:block;font-size:11px;font-weight:700;line-height:1.3}
+.cell-date{display:block;font-size:9px;font-family:var(--ui);opacity:.75;line-height:1.2;white-space:nowrap}
+.badge{display:inline-block;font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:4px;font-weight:500;white-space:nowrap}
+.bsec{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+.bsta{background:#e0f2fe;color:#075985;border:1px solid #7dd3fc}
+.buni{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.mrow{display:flex;gap:2px;flex-wrap:wrap}
+/* leave cells — locked, can't be overridden */
+td.leave-cell{cursor:not-allowed;opacity:.85}
+td.leave-cell::after{content:'🔒';font-size:7px;position:absolute;top:1px;right:1px}
+td.leave-cell{position:relative}
+/* pending */
+td.leave-pending{outline:2px dashed #f59e0b!important;outline-offset:-2px}
+/* context menu */
+.cmenu{position:fixed;z-index:2000;background:#fff;border:1px solid var(--border2);border-radius:var(--rl);box-shadow:0 8px 28px rgba(0,0,0,.14);padding:5px;min-width:200px;display:none}
+.cmenu.open{display:block}
+.ci{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--ui);font-weight:500;transition:background .1s}
+.ci:hover{background:var(--bg3)}
+.cdot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1)}
+.csep{height:1px;background:var(--border);margin:4px 0}
+.ci.active-shift{background:#eff6ff;font-weight:700}
+/* drag select */
+td.drag-over{outline:2px solid var(--accent)!important;outline-offset:-2px}
+/* toast */
+.toast{position:fixed;bottom:18px;right:18px;z-index:3000;font-size:11px;font-family:var(--mono);font-weight:600;padding:8px 14px;border-radius:var(--r);box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;gap:8px;align-items:center}
+.toast.show{display:flex}
+.toast.ok{background:var(--green);color:#fff}
+.toast.err{background:var(--red);color:#fff}
+.toast.info{background:var(--accent);color:#fff}
+/* info box */
+.ibox{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.ibox strong{color:var(--accent)}
+/* leave legend bar */
+.leave-bar{background:#fefce8;border:1px solid #fde68a;border-radius:var(--r);padding:7px 12px;font-size:11px;color:#92400e;margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media(max-width:640px){
+  header{padding:8px 12px;gap:6px}.logo{font-size:13px}.sub{display:none}
+  main{padding:8px 10px}.toolbar{gap:5px;padding:8px}
+  td{min-width:38px}.cell-shift{font-size:10px}.cell-date{font-size:8px}
+  thead th{min-width:38px}.dhdr-num{font-size:10px}
+  .twrap{max-height:calc(100vh - 240px)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">📋 UNFICYP UNPOL ROSTER — ADMIN</div>
+    <div class="sub">SharePoint · roster-shifts.json in RosterData</div>
+  </div>
+  <div class="hright">
+    <span class="rbadge">ADMIN</span>
+    <div class="sind" id="saveInd"><span class="sdot"></span><span id="saveMsg">Ready</span></div>
+    <button class="btn sm" onclick="loadAll()">↻ Reload SP</button>
+    <button class="btn sm acc" onclick="saveRosterJSON()" title="Save roster-shifts.json to RosterData library">💾 Save JSON</button>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" id="tab-roster"  onclick="showTab('roster',this)">Roster Grid</div>
+  <div class="tab"        id="tab-shifts"  onclick="showTab('shifts',this)">Shift Types</div>
+  <div class="tab"        id="tab-config"  onclick="showTab('config',this)">Settings</div>
+</nav>
+
+<main>
+
+  <!-- ══ ROSTER GRID ══════════════════════════════ -->
+  <div class="panel active" id="panel-roster">
+
+    <div class="ibox">
+      <strong>How it works:</strong>
+      Staff are loaded from <strong>UNFICYP UNPOL Personnel</strong>.
+      Approved &amp; pending leave from <strong>Leave Requests</strong> is shown automatically — those cells are <strong>locked</strong> (🔒) and cannot be overridden.
+      Click any unlocked cell to assign a working shift (D / A / N / etc.).
+      Click <strong>💾 Save JSON</strong> to persist the working-shift roster to <code>RosterData/roster-shifts.json</code>.
+    </div>
+
+    <div class="leave-bar" id="leaveBar">
+      ℹ️ Loading leave data…
+    </div>
+
+    <div class="toolbar">
+      <select id="fSec" onchange="cascadeFilters();buildBody()"><option value="">All sectors</option></select>
+      <select id="fSta" onchange="cascadeFilters();buildBody()"><option value="">All stations</option></select>
+      <select id="fUni" onchange="buildBody()"><option value="">All units</option></select>
+      <select id="fShift" onchange="buildBody()"><option value="">All shifts</option></select>
+      <label style="margin-left:auto">Start date
+        <input type="date" id="startDate" onchange="onStartDateChange()">
+      </label>
+    </div>
+
+    <div class="stats" id="statsBar"></div>
+    <div class="legend" id="shiftLegend"></div>
+
+    <div class="twrap">
+      <table><thead id="rHead"></thead><tbody id="rBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ══ SHIFT TYPES ══════════════════════════════ -->
+  <div class="panel" id="panel-shifts">
+    <div class="ibox">
+      Define the <strong>working shift types</strong> (D, A, N, etc.) assignable from the grid.
+      Leave types (ALO, RDO…) come from the SharePoint Leave Requests list and cannot be edited here.
+    </div>
+    <div id="shiftEditor"></div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn acc" onclick="addShift()">+ Add shift type</button>
+      <button class="btn" onclick="buildShiftEditor()">↺ Reset view</button>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ═════════════════════════════════ -->
+  <div class="panel" id="panel-config">
+    <div style="max-width:560px">
+      <div class="ibox" style="margin-bottom:16px">
+        <strong>SharePoint endpoints (read-only reference)</strong><br><br>
+        Site: <code>https://unitednations.sharepoint.com/sites/UNFICYPUNPOLPRAKSYS</code><br>
+        Personnel list: <code>UNFICYP UNPOL Personnel</code><br>
+        Leave list: <code>Leave Requests</code><br>
+        Roster JSON: <code>RosterData / roster-shifts.json</code>
+      </div>
+      <div class="ibox" style="margin-bottom:16px">
+        <strong>roster-shifts.json structure</strong><br><br>
+        The file saved to SharePoint contains:<br><br>
+        <code>version</code> — schema version<br>
+        <code>startDate</code> — first day of the 56-day window (ISO date)<br>
+        <code>shiftDefs</code> — array of working shift definitions<br>
+        <code>roster</code> — object keyed by user ID (u{SpListItemId}), value is array[56] of shift keys<br><br>
+        Leave days from the SP list are <em>not</em> stored in this file — they are always read live from SharePoint.
+      </div>
+      <div class="ibox">
+        <strong>Bulk actions</strong><br><br>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn" onclick="bulkFill('D')">Fill all → D (Day)</button>
+          <button class="btn" onclick="bulkFill('A')">Fill all → A (Afternoon)</button>
+          <button class="btn" onclick="bulkFill('OFF')">Clear all working shifts</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">
+          These only affect working shifts in the JSON. Leave days from SP are unaffected.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- context menu -->
+<div class="cmenu" id="cmenu"></div>
+<!-- toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   SHAREPOINT CONFIG
+   ═══════════════════════════════════════════════════ */
+const SP = {
+  site:          'https://unitednations.sharepoint.com/sites/UNFICYPUNPOLPRAKSYS',
+  personnelList: 'UNFICYP UNPOL Personnel',
+  leaveList:     'Leave Requests',
+  rosterLib:     'RosterData',
+  rosterFile:    'roster-shifts.json',
+  col: {
+    name:        'Full_x0020_Name',
+    sector:      'Sector',
+    station:     'Station',
+    unit:        'Unit',
+    nationality: 'Nationality',
+  },
+  leave: {
+    ipoName:   'IPO_x0020_Name',
+    dayType:   'Day_x0020_Type',
+    startDate: 'Start_x0020_Date',
+    endDate:   'End_x0020_Date',
+    status:    'Request_x0020_Approval_x0020_Sta',
+  },
+};
+
+const LEAVE_TYPE_MAP = {
+  'ALO': { key:'ALO', label:'ALO', name:'Annual Leave (On Cyprus)',  bg:'#fce7f3', fg:'#9d174d', border:'#f9a8d4' },
+  'ALI': { key:'ALI', label:'ALI', name:'Annual Leave (Off Cyprus)', bg:'#f5d0fe', fg:'#7e22ce', border:'#e879f9' },
+  'RDO': { key:'RDO', label:'RDO', name:'Rest Day (On Cyprus)',      bg:'#fef9c3', fg:'#854d0e', border:'#fde047' },
+  'RDI': { key:'RDI', label:'RDI', name:'Rest Day (Off Cyprus)',     bg:'#fef08a', fg:'#713f12', border:'#facc15' },
+  'SLO': { key:'SLO', label:'SLO', name:'Sick Leave (On Cyprus)',    bg:'#fee2e2', fg:'#991b1b', border:'#fca5a5' },
+  'SLI': { key:'SLI', label:'SLI', name:'Sick Leave (Off Cyprus)',   bg:'#fecaca', fg:'#7f1d1d', border:'#f87171' },
+};
+
+/* ═══════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════ */
+const DAYS = 56;
+const OFF_DEF = {key:'OFF',label:'',name:'Off / Clear',bg:'#f8fafc',fg:'#94a3b8',border:'#e2e8f0'};
+
+let shiftDefs = [
+  {key:'D', label:'D', name:'Day',       bg:'#dbeafe',fg:'#1e40af',border:'#93c5fd'},
+  {key:'A', label:'A', name:'Afternoon', bg:'#dcfce7',fg:'#166534',border:'#86efac'},
+  {key:'N', label:'N', name:'Night',     bg:'#ede9fe',fg:'#5b21b6',border:'#c4b5fd'},
+];
+
+let users    = [];
+let roster   = {};  // {userId: [key x 56]}  — working shifts only
+let leaveMap = {};  // {userId: {dayIndex: {key,label,name,bg,fg,border,status}}}
+let sectors=[], stations=[], units=[];
+let startDate = new Date();
+let dirty = false;
+
+/* drag-assign state */
+let dragActive=false, dragShiftKey=null, dragCells=new Set();
+
+/* ═══════════════════════════════════════════════════
+   SP REST HELPERS
+   ═══════════════════════════════════════════════════ */
+function spUrl(list,select,filter='',top=5000){
+  const p=new URLSearchParams({'$select':select,'$top':String(top)});
+  if(filter) p.set('$filter',filter);
+  return `${SP.site}/_api/web/lists/getbytitle('${encodeURIComponent(list)}')/items?${p}`;
+}
+async function spGet(list,select,filter=''){
+  const r=await fetch(spUrl(list,select,filter),{headers:{'Accept':'application/json;odata=verbose'},credentials:'include'});
+  if(!r.ok) throw new Error(`"${list}" HTTP ${r.status}`);
+  const j=await r.json(); return j.d?.results??j.value??[];
+}
+async function spGetFile(lib,file){
+  const url=`${SP.site}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(lib)}')/Files('${encodeURIComponent(file)}')/$value`;
+  const r=await fetch(url,{headers:{'Accept':'application/json'},credentials:'include'});
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error(`"${file}" HTTP ${r.status}`);
+  return r.text();
+}
+async function spDigest(){
+  const r=await fetch(`${SP.site}/_api/contextinfo`,{method:'POST',headers:{'Accept':'application/json;odata=verbose','Content-Length':'0'},credentials:'include'});
+  const j=await r.json(); return j.d?.GetContextWebInformation?.FormDigestValue||j.FormDigestValue;
+}
+async function spSaveFile(lib,file,content){
+  const digest=await spDigest();
+  const enc=new TextEncoder().encode(content);
+  const url=`${SP.site}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(lib)}')/Files/add(url='${encodeURIComponent(file)}',overwrite=true)`;
+  const r=await fetch(url,{method:'POST',headers:{'Accept':'application/json;odata=verbose','X-RequestDigest':digest,'Content-Length':String(enc.length)},body:enc,credentials:'include'});
+  if(!r.ok) throw new Error(`Save HTTP ${r.status}`);
+}
+
+/* ═══════════════════════════════════════════════════
+   LOAD
+   ═══════════════════════════════════════════════════ */
+async function loadAll(){
+  setStatus('saving','Loading from SharePoint…');
+  try{
+    await loadPersonnel();
+    await Promise.all([loadRosterJSON(), loadLeaveRequests()]);
+    populateSelects(); buildShiftUI(); buildHead(); buildBody();
+    dirty=false;
+    setStatus('saved','Loaded ✓');
+    setTimeout(()=>setStatus('idle','Ready'),2500);
+  }catch(e){
+    setStatus('error','Load failed: '+e.message);
+    showToast('⚠ '+e.message,'err');
+    console.error(e);
+  }
+}
+
+async function loadPersonnel(){
+  const c=SP.col;
+  const items=await spGet(SP.personnelList,`Id,${c.name},${c.sector},${c.station},${c.unit},${c.nationality}`);
+  users=items.map(i=>({
+    id:'u'+i.Id, name:i[c.name]||'', sector:i[c.sector]||'',
+    station:i[c.station]||'', unit:i[c.unit]||'', nationality:i[c.nationality]||'',
+  })).filter(u=>u.name);
+  sectors =[...new Set(users.map(u=>u.sector).filter(Boolean))].sort();
+  stations=[...new Set(users.map(u=>u.station).filter(Boolean))].sort();
+  units   =[...new Set(users.map(u=>u.unit).filter(Boolean))].sort();
+}
+
+async function loadRosterJSON(){
+  const text=await spGetFile(SP.rosterLib,SP.rosterFile);
+  if(!text){ roster={}; users.forEach(u=>{roster[u.id]=Array(DAYS).fill('OFF');}); return; }
+  const data=JSON.parse(text);
+  if(data.startDate){
+    startDate=new Date(data.startDate);
+    document.getElementById('startDate').value=data.startDate;
+  }
+  if(data.shiftDefs&&data.shiftDefs.length) shiftDefs=data.shiftDefs;
+  roster=data.roster||{};
+  users.forEach(u=>{ if(!roster[u.id]) roster[u.id]=Array(DAYS).fill('OFF'); });
+}
+
+async function loadLeaveRequests(){
+  const c=SP.leave;
+  const fields=`${c.ipoName},${c.dayType},${c.startDate},${c.endDate},${c.status}`;
+  const windowEnd=new Date(startDate); windowEnd.setDate(windowEnd.getDate()+DAYS-1);
+  const fmt=d=>d.toISOString().slice(0,10)+'T00:00:00Z';
+  const filter=`${c.status} ne 'Rejected' and ${c.endDate} ge datetime'${fmt(startDate)}' and ${c.startDate} le datetime'${fmt(windowEnd)}'`;
+  let items=[]; try{ items=await spGet(SP.leaveList,fields,filter); }catch(e){ console.warn('Leave:',e.message); }
+  leaveMap={};
+  const base=new Date(startDate); base.setHours(0,0,0,0);
+  let totalLeave=0, totalPending=0;
+  items.forEach(item=>{
+    const ipoName=(item[c.ipoName]||'').trim();
+    const dayType=(item[c.dayType]||'').trim();
+    const status =item[c.status]||'';
+    const start  =new Date(item[c.startDate]); start.setHours(0,0,0,0);
+    const end    =new Date(item[c.endDate]);   end.setHours(0,0,0,0);
+    const user=users.find(u=>u.name.toLowerCase()===ipoName.toLowerCase()); if(!user) return;
+    const typeDef=LEAVE_TYPE_MAP[dayType]; if(!typeDef) return;
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+      const diff=Math.round((d-base)/86400000);
+      if(diff<0||diff>=DAYS) continue;
+      if(!leaveMap[user.id]) leaveMap[user.id]={};
+      leaveMap[user.id][diff]={...typeDef,status};
+      if(status==='Approved') totalLeave++;
+      if(status==='Pending')  totalPending++;
+    }
+  });
+  const lb=document.getElementById('leaveBar');
+  if(lb) lb.innerHTML=`📅 Leave loaded from SP: <strong>${totalLeave}</strong> approved day(s), <strong>${totalPending}</strong> pending. Leave cells are locked — edit via the Leave Requests list.`;
+}
+
+/* ═══════════════════════════════════════════════════
+   SAVE
+   ═══════════════════════════════════════════════════ */
+async function saveRosterJSON(){
+  setStatus('saving','Saving to SharePoint…');
+  try{
+    const payload={
+      version:2,
+      savedAt:new Date().toISOString(),
+      startDate:document.getElementById('startDate').value||new Date(startDate).toISOString().slice(0,10),
+      shiftDefs,
+      roster,
+    };
+    await spSaveFile(SP.rosterLib, SP.rosterFile, JSON.stringify(payload,null,2));
+    dirty=false;
+    setStatus('saved','Saved '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+    setTimeout(()=>setStatus('idle','Ready'),4000);
+    showToast('✓ roster-shifts.json saved to RosterData','ok');
+  }catch(e){
+    setStatus('error','Save failed: '+e.message);
+    showToast('⚠ Save failed: '+e.message,'err');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   EFFECTIVE CELL (leave takes priority, read-only)
+   ═══════════════════════════════════════════════════ */
+function getCell(userId,dayIndex){
+  const leave=leaveMap[userId]?.[dayIndex];
+  if(leave){
+    if(leave.status==='Approved') return{...leave,source:'leave-approved',locked:true};
+    if(leave.status==='Pending')  return{...leave,source:'leave-pending', locked:true};
+  }
+  const rKey=roster[userId]?.[dayIndex]||'OFF';
+  const def=shiftDefs.find(s=>s.key===rKey)||OFF_DEF;
+  return{...def,source:'roster',locked:false};
+}
+
+/* ═══════════════════════════════════════════════════
+   SHIFT LOOKUPS
+   ═══════════════════════════════════════════════════ */
+function rebuildShiftLookups(){
+  const allDefs=[...shiftDefs,...Object.values(LEAVE_TYPE_MAP),OFF_DEF];
+  let el=document.getElementById('aShiftStyles');
+  if(!el){el=document.createElement('style');el.id='aShiftStyles';document.head.appendChild(el);}
+  el.textContent=allDefs.map(s=>`td.sc_${s.key}{background:${s.bg};color:${s.fg};font-weight:600}td.sc_${s.key}.we{background:${s.bg}cc!important}`).join('')
+    +`td.sc_OFF{background:${OFF_DEF.bg};color:${OFF_DEF.fg};font-weight:400}`;
+}
+rebuildShiftLookups();
+
+function buildShiftUI(){
+  rebuildShiftLookups();
+  const leg=document.getElementById('shiftLegend');
+  if(leg) leg.innerHTML=shiftDefs.map(s=>`<span><span class="lsq" style="background:${s.bg};border-color:${s.border}"></span>${esc(s.label)} ${esc(s.name)}</span>`).join('')
+    +`<span style="color:#92400e">| Leave (read-only): </span>`
+    +Object.values(LEAVE_TYPE_MAP).map(s=>`<span><span class="lsq" style="background:${s.bg};border-color:${s.border}"></span>${esc(s.label)}</span>`).join('');
+  const fShift=document.getElementById('fShift');
+  if(fShift){
+    const cur=fShift.value;
+    fShift.innerHTML='<option value="">All shifts</option>'
+      +shiftDefs.map(s=>`<option value="${esc(s.key)}">${esc(s.label)} — ${esc(s.name)}</option>`).join('')
+      +'<optgroup label="Leave types">'+Object.values(LEAVE_TYPE_MAP).map(s=>`<option value="${esc(s.key)}">${esc(s.label)} — ${esc(s.name)}</option>`).join('')+'</optgroup>';
+    fShift.value=cur;
+  }
+  buildShiftEditor();
+  const sb=document.getElementById('statsBar');
+  if(sb) sb.innerHTML=`<div class="stat"><span class="slbl">IPOs</span><span class="sval" id="su">—</span></div>`
+    +shiftDefs.map(s=>`<div class="stat" style="border-color:${s.border}"><span class="slbl">${esc(s.label)}</span><span class="sval" id="stat_${s.key}" style="color:${s.fg}">—</span></div>`).join('')
+    +Object.values(LEAVE_TYPE_MAP).map(s=>`<div class="stat" style="border-color:${s.border}"><span class="slbl">${esc(s.label)}</span><span class="sval" id="stat_${s.key}" style="color:${s.fg}">—</span></div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   FILTERS
+   ═══════════════════════════════════════════════════ */
+function populateSelects(){
+  const fSec=document.getElementById('fSec');
+  if(fSec){const cur=fSec.value;fSec.innerHTML='<option value="">All sectors</option>'+sectors.map(v=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}</option>`).join('');}
+  cascadeFilters();
+}
+function cascadeFilters(){
+  const selSec=document.getElementById('fSec')?.value||'';
+  const selSta=document.getElementById('fSta')?.value||'';
+  const availStas=[...new Set(users.filter(u=>!selSec||u.sector===selSec).map(u=>u.station).filter(Boolean))].sort();
+  const staEl=document.getElementById('fSta');
+  if(staEl){const cur=availStas.includes(staEl.value)?staEl.value:'';staEl.innerHTML='<option value="">All stations</option>'+availStas.map(v=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}</option>`).join('');}
+  const availUnits=[...new Set(users.filter(u=>(!selSec||u.sector===selSec)&&(!selSta||u.station===selSta)).map(u=>u.unit).filter(Boolean))].sort();
+  const uniEl=document.getElementById('fUni');
+  if(uniEl){const cur=availUnits.includes(uniEl.value)?uniEl.value:'';uniEl.innerHTML='<option value="">All units</option>'+availUnits.map(v=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}</option>`).join('');}
+}
+function filtered(){
+  const fsc=document.getElementById('fSec')?.value||'';
+  const fst=document.getElementById('fSta')?.value||'';
+  const fun=document.getElementById('fUni')?.value||'';
+  const fsh=document.getElementById('fShift')?.value||'';
+  return users.filter(u=>{
+    if(fsc&&u.sector!==fsc) return false;
+    if(fst&&u.station!==fst) return false;
+    if(fun&&u.unit!==fun) return false;
+    if(fsh){let f=false;for(let i=0;i<DAYS;i++){if(getCell(u.id,i).key===fsh){f=true;break;}}if(!f)return false;}
+    return true;
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════════ */
+function buildHead(){
+  const base=new Date(startDate);
+  let h='<tr><th class="uc">IPO</th><th class="ic">Info</th>';
+  for(let i=0;i<DAYS;i++){
+    const d=new Date(base);d.setDate(base.getDate()+i);
+    const we=d.getDay()===0||d.getDay()===6;
+    const ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    h+=`<th class="${we?'we':''}" title="${ds}"><span class="dhdr-num">${i+1}</span><span class="dhdr-date">${ds}</span></th>`;
+  }
+  document.getElementById('rHead').innerHTML=h+'</tr>';
+}
+function buildBody(){
+  const base=new Date(startDate);
+  const list=filtered();
+  updateStats(list);
+  let h='';
+  list.forEach(u=>{
+    h+=`<tr><th class="uc">${esc(u.name)}</th>`
+      +`<td class="ic"><div class="mrow">`
+      +(u.sector  ?`<span class="badge bsec">${esc(u.sector)}</span>`:'')
+      +(u.station ?`<span class="badge bsta">${esc(u.station)}</span>`:'')
+      +(u.unit    ?`<span class="badge buni">${esc(u.unit)}</span>`:'')
+      +`</div></td>`;
+    for(let i=0;i<DAYS;i++){
+      const d=new Date(base);d.setDate(base.getDate()+i);
+      const we=d.getDay()===0||d.getDay()===6;
+      const ds=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+      const cell=getCell(u.id,i);
+      const isPending=cell.source==='leave-pending';
+      const cls=`sc_${cell.key}`+(we?' we':'')+(cell.locked?' leave-cell':'')+(isPending?' leave-pending':'');
+      const tip=esc(cell.name)+(isPending?' — PENDING':(cell.source==='leave-approved'?' — Approved leave':''));
+      h+=`<td class="${cls}" data-uid="${esc(u.id)}" data-day="${i}" data-locked="${cell.locked?1:0}" title="${tip}">`
+        +(cell.label?`<span class="cell-shift">${esc(cell.label)}</span>`:'')
+        +`<span class="cell-date">${ds}</span></td>`;
+    }
+    h+='</tr>';
+  });
+  document.getElementById('rBody').innerHTML=h;
+  attachCellHandlers();
+}
+function updateStats(list){
+  const allKeys=[...shiftDefs.map(s=>s.key),...Object.keys(LEAVE_TYPE_MAP)];
+  const counts=Object.fromEntries(allKeys.map(k=>[k,0]));
+  (list||filtered()).forEach(u=>{for(let i=0;i<DAYS;i++){const k=getCell(u.id,i).key;if(counts[k]!==undefined)counts[k]++;}});
+  const su=document.getElementById('su');if(su)su.textContent=(list||filtered()).length;
+  allKeys.forEach(k=>{const el=document.getElementById('stat_'+k);if(el)el.textContent=counts[k]||0;});
+}
+
+/* ═══════════════════════════════════════════════════
+   CELL INTERACTION
+   Right-click or click → context menu
+   Drag → paint multiple cells with same shift
+   ═══════════════════════════════════════════════════ */
+function attachCellHandlers(){
+  document.querySelectorAll('#rBody td[data-uid]').forEach(td=>{
+    td.addEventListener('contextmenu',e=>{e.preventDefault();openMenu(e,td);});
+    td.addEventListener('click',e=>{if(!td.dataset.locked||td.dataset.locked==='0') openMenu(e,td);});
+    td.addEventListener('mousedown',e=>{if(e.button===0&&(td.dataset.locked==='0'||!td.dataset.locked)) startDrag(td);});
+    td.addEventListener('mouseenter',()=>{ if(dragActive) applyDrag(td); });
+    td.addEventListener('mouseup',()=>{ if(dragActive) endDrag(); });
+  });
+}
+document.addEventListener('mouseup',()=>{ if(dragActive) endDrag(); });
+
+function startDrag(td){
+  dragActive=true;
+  dragShiftKey=null; // will be set in openMenu or after menu
+  dragCells=new Set([td]);
+  td.classList.add('drag-over');
+}
+function applyDrag(td){
+  if(!td.dataset.locked||td.dataset.locked==='0'){
+    dragCells.add(td);
+    td.classList.add('drag-over');
+  }
+}
+function endDrag(){
+  dragActive=false;
+  document.querySelectorAll('td.drag-over').forEach(t=>t.classList.remove('drag-over'));
+  dragCells.clear();
+}
+
+let ctxTd=null;
+function openMenu(e,td){
+  if(td.dataset.locked==='1') return;
+  ctxTd=td;
+  const uid=td.dataset.uid, day=parseInt(td.dataset.day,10);
+  const cur=getCell(uid,day);
+  const cmenu=document.getElementById('cmenu');
+  let html='<div style="padding:4px 10px 4px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Assign working shift</div>';
+  shiftDefs.forEach(s=>{
+    const active=cur.key===s.key&&cur.source==='roster';
+    html+=`<div class="ci${active?' active-shift':''}" onclick="assignShift('${esc(uid)}',${day},'${esc(s.key)}')">`+
+      `<span class="cdot" style="background:${s.bg};border-color:${s.border}"></span>${esc(s.label)} — ${esc(s.name)}</div>`;
+  });
+  html+=`<div class="csep"></div>`;
+  html+=`<div class="ci" onclick="assignShift('${esc(uid)}',${day},'OFF')"><span class="cdot" style="background:#f8fafc;border-color:#e2e8f0"></span>Clear / Off</div>`;
+  // drag-paint option
+  if(dragCells.size>1){
+    html+=`<div class="csep"></div>`;
+    html+=`<div style="padding:3px 10px;font-size:10px;color:var(--text3)">Apply to ${dragCells.size} selected cells:</div>`;
+    shiftDefs.forEach(s=>{
+      html+=`<div class="ci" style="padding:5px 10px" onclick="applyToDrag('${esc(s.key)}')">`+
+        `<span class="cdot" style="background:${s.bg};border-color:${s.border}"></span>Paint ${esc(s.label)}</div>`;
+    });
+  }
+  cmenu.innerHTML=html;
+  const x=Math.min(e.clientX,window.innerWidth-210), y=Math.min(e.clientY,window.innerHeight-350);
+  cmenu.style.left=x+'px'; cmenu.style.top=y+'px';
+  cmenu.classList.add('open');
+  e.stopPropagation(); e.preventDefault();
+}
+document.addEventListener('click',()=>document.getElementById('cmenu').classList.remove('open'));
+
+function assignShift(uid,day,key){
+  document.getElementById('cmenu').classList.remove('open');
+  if(!roster[uid]) roster[uid]=Array(DAYS).fill('OFF');
+  roster[uid][day]=key;
+  dirty=true;
+  setStatus('saving','Unsaved changes — click 💾 Save JSON');
+  buildBody();
+}
+
+function applyToDrag(key){
+  document.getElementById('cmenu').classList.remove('open');
+  dragCells.forEach(td=>{
+    const uid=td.dataset.uid, day=parseInt(td.dataset.day,10);
+    if(td.dataset.locked==='0'||!td.dataset.locked){
+      if(!roster[uid]) roster[uid]=Array(DAYS).fill('OFF');
+      roster[uid][day]=key;
+    }
+  });
+  dirty=true;
+  setStatus('saving','Unsaved changes — click 💾 Save JSON');
+  endDrag();
+  buildBody();
+}
+
+/* ═══════════════════════════════════════════════════
+   SHIFT EDITOR
+   ═══════════════════════════════════════════════════ */
+function buildShiftEditor(){
+  const div=document.getElementById('shiftEditor');
+  if(!div) return;
+  let html='<table style="border-collapse:collapse;width:100%;max-width:600px"><thead><tr style="background:#f8f9fc">'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Key</th>'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Label</th>'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Name</th>'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Bg</th>'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Text</th>'
+    +'<th style="padding:7px 10px;font-size:11px;color:var(--text3);font-weight:600;text-align:left">Border</th>'
+    +'<th style="padding:7px 6px"></th>'
+    +'</tr></thead><tbody>';
+  shiftDefs.forEach((s,i)=>{
+    html+=`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 8px"><input type="text" value="${esc(s.key)}" style="width:55px;font-family:var(--mono)" onchange="updateShift(${i},'key',this.value)"></td>
+      <td style="padding:5px 8px"><input type="text" value="${esc(s.label)}" style="width:45px;font-family:var(--mono)" onchange="updateShift(${i},'label',this.value)"></td>
+      <td style="padding:5px 8px"><input type="text" value="${esc(s.name)}" style="width:140px" onchange="updateShift(${i},'name',this.value)"></td>
+      <td style="padding:5px 8px"><input type="color" value="${s.bg}" style="width:36px;height:28px;border:none;padding:0;cursor:pointer" onchange="updateShift(${i},'bg',this.value)"></td>
+      <td style="padding:5px 8px"><input type="color" value="${s.fg}" style="width:36px;height:28px;border:none;padding:0;cursor:pointer" onchange="updateShift(${i},'fg',this.value)"></td>
+      <td style="padding:5px 8px"><input type="color" value="${s.border}" style="width:36px;height:28px;border:none;padding:0;cursor:pointer" onchange="updateShift(${i},'border',this.value)"></td>
+      <td style="padding:5px 6px"><button class="btn sm dan" onclick="removeShift(${i})">✕</button></td>
+    </tr>`;
+  });
+  div.innerHTML=html+'</tbody></table>';
+}
+function updateShift(i,field,val){ shiftDefs[i][field]=val; dirty=true; buildShiftUI(); buildBody(); }
+function removeShift(i){ if(!confirm('Remove shift type "'+shiftDefs[i].name+'"?')) return; shiftDefs.splice(i,1); dirty=true; buildShiftUI(); buildBody(); }
+function addShift(){ shiftDefs.push({key:'NEW',label:'NEW',name:'New Shift',bg:'#e0f2fe',fg:'#0369a1',border:'#7dd3fc'}); dirty=true; buildShiftUI(); showTab('shifts',document.getElementById('tab-shifts')); }
+
+/* ═══════════════════════════════════════════════════
+   BULK FILL
+   ═══════════════════════════════════════════════════ */
+function bulkFill(key){
+  if(!confirm(`Fill all unlocked cells with "${key}"? This overwrites all working shifts.`)) return;
+  users.forEach(u=>{
+    if(!roster[u.id]) roster[u.id]=Array(DAYS).fill('OFF');
+    for(let i=0;i<DAYS;i++){
+      if(!leaveMap[u.id]?.[i]) roster[u.id][i]=key;
+    }
+  });
+  dirty=true; setStatus('saving','Unsaved changes — click 💾 Save JSON');
+  buildBody();
+  showToast(`All working shifts set to "${key}"`,'info');
+}
+
+/* ═══════════════════════════════════════════════════
+   START DATE CHANGE
+   ═══════════════════════════════════════════════════ */
+function onStartDateChange(){
+  const val=document.getElementById('startDate').value;
+  if(val){ startDate=new Date(val); dirty=true; setStatus('saving','Unsaved changes'); buildHead(); buildBody(); }
+}
+
+/* ═══════════════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════════════ */
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+function setStatus(type,msg){ document.getElementById('saveInd').className='sind '+type; document.getElementById('saveMsg').textContent=msg; }
+let _tt; function showToast(msg,type='info'){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast show '+type; clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+window.addEventListener('beforeunload',e=>{ if(dirty){e.preventDefault();e.returnValue='';} });
+
+// Boot
+document.getElementById('startDate').value = new Date().toISOString().slice(0,10);
+loadAll();
+</script>
+</body>
+</html>
